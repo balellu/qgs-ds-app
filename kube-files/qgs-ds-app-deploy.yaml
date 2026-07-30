@@ -1,0 +1,61 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: qgs-ds-app
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: qgs-ds-app
+  name: qgs-ds-app-deploy
+  labels:
+    app: qgs-ds-app
+    test: test
+spec:
+  selector:
+    matchLabels:
+      app: qgs-ds-app
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: qgs-ds-app
+    spec:
+      containers:
+      - name: qgs-ds-app
+        image: quay.io/pbalellu/qgs-ds-app
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+        resources:
+          requests:
+            memory: "264Mi"
+            cpu: "250m"
+          limits:
+            memory: "628Mi"
+            cpu: "1000m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+  name: quarkus-app-service
+  namespace: qgs-ds-app
+  labels:
+    app: qgs-ds-app
+spec:
+  type: LoadBalancer
+  selector:
+    app: qgs-ds-app
+  ports:
+    - protocol: TCP
+      name: http
+      port: 80
+      targetPort: 8080

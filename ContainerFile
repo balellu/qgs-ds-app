@@ -1,3 +1,4 @@
+#will need to change the base image
 FROM registry.access.redhat.com/ubi8/openjdk-17:latest
 WORKDIR /work/
 COPY target/quarkus-app/lib/ /work/lib/
